@@ -1,9 +1,7 @@
 /*
   Line Following with PI Control
-  Based on: 13 Second Track Success
-  Added: Proportional-Integral (PI) feedback control
-  Written: April 19, 2025
-  Edited: May 6, 2025
+  Written: May 7, 2025
+  Edited: -
   I/O:
   A0:  [INPUT] Left Line Sensor
   A1:  [INPUT] Center Line Sensor
