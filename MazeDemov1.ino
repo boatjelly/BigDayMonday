@@ -19,6 +19,7 @@
   - add PWM constants
   - CONSIDER: getting rid of functions and just hard-coding in placeswhere its only used once
   - i'm tired :(
+  - ADD ODOMETER
 */
 
 volatile unsigned char whiskerLeft = 1;   // Active-LOW
