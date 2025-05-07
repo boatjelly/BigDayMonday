@@ -18,6 +18,10 @@
   - greg exists in the ISRs
   - moved logic to loop; ISR only collects data and some PI stuff now
 
+  TO DO:
+  - see if it works
+  - add 3 point turn
+
   Now with feedback control! Good job Jer.
 */
 
