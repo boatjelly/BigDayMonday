@@ -13,15 +13,15 @@
   D0:
   D1:
   D2:
-  D3: Right Motor Reverse    [TCNT2 OC2B]
-  D4: Left Motor Control     [x]
-  D5: Left Motor Reverse     [TCNT0 OC0B]
-  D6: Left Motor Forward     [TCNT0 OC0A]
-  D7: Right Motor Control    [x]
+  D3: Right Motor Reverse    [TCNT2 OC2B] [Pin 10 H-Bridge]
+  D4: Left Motor Control     [x]          [Pin 1 H-Bridge]
+  D5: Left Motor Reverse     [TCNT0 OC0B] [Pin 7 H-Bridge]
+  D6: Left Motor Forward     [TCNT0 OC0A] [Pin 2 H-Bridge]
+  D7: Right Motor Control    [x]          [Pin 9 H-Bridge]
   D8: 
   D9:  
   D10: 
-  D11: Right Motor Forward   [TCNT2 OC2A]
+  D11: Right Motor Forward   [TCNT2 OC2A] [Pin 15 H-Bridge]
   D12: Right Whisker         [PCI PORTB 0x10]
   D13: Left Whisker          [PCI PORTB 0x20]
 */
