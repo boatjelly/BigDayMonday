@@ -1,11 +1,8 @@
-;
 ; This code acts as a NOR or XNOR logic gate
 ; If a toggle switch is asserted, the code acts as a XNOR
 ; If deasserted, the code acts as a NOR
-;
 ; WRITTEN: 05/09/2025
-; AUTHOR : Jacob JM Horstman, Sasha Dauz
-;
+; AUTHOR : Jacob JM Horstman
 ; I/O pins
 ; D3: Toggle Switch (external pull-down)
 ; D2: LED
@@ -60,6 +57,5 @@ XNOR:
 
 turn_on_led:
 	SBI PORTD, 2
-
 	; now that the LED is on, go back to the start of the loop
 	JMP loop
