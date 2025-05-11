@@ -2,15 +2,15 @@
 ; This code acts as a NOR or XNOR logic gate
 ; If a toggle switch is asserted, the code acts as a XNOR
 ; If deasserted, the code acts as a NOR
-; 
+;
 ; WRITTEN: 05/09/2025
 ; AUTHOR : Jacob JM Horstman, Sasha Dauz
 ;
 ; I/O pins
-; D3: Toggle Switch (no pull-down)
+; D3: Toggle Switch (external pull-down)
 ; D2: LED
-; A5: pushbutton (external pull-down)
-; A4: pushbutton (external pull-down)
+; A5: pushbutton    (external pull-down)
+; A4: pushbutton    (external pull-down)
 
 ; any non-repeating tasks should occur outside of the loop
 SBI DDRD, 2	; configure D2 as an output pin
@@ -50,11 +50,11 @@ XNOR:
 	; mask data from the PINC register
 	ANDI r16, 0x20
 	ANDI r17, 0x10
-	LSR r17
+	LSR r16
 	; compare r16 and r17
 	CP r16, r17
 	; if r16 != r17, turn on the LED
-	BRNE turn_on_led	; if r16 is zero, the code will branch to the turn_on_led address location
+	BREQ turn_on_led	; if r16 != r17, the code will branch to the turn_on_led address location
 	; otherwise, we can jump back to the start of the loop
 	JMP loop
 
