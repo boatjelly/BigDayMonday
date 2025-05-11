@@ -11,14 +11,14 @@
 #define DELAY_RESET              15          // in mS
 
 #if (LCD_BITS==8)                            // If using 8 bit mode, you must configure DB0-DB7
-  #define LCD_DB0_PORT           PORTC
-  #define LCD_DB0_PIN            0
-  #define LCD_DB1_PORT           PORTC
-  #define LCD_DB1_PIN            1
-  #define LCD_DB2_PORT           PORTC
-  #define LCD_DB2_PIN            2
-  #define LCD_DB3_PORT           PORTC
-  #define LCD_DB3_PIN            3
+  #define LCD_DB0_PORT           PORTB
+  #define LCD_DB0_PIN            2
+  #define LCD_DB1_PORT           PORTB
+  #define LCD_DB1_PIN            3
+  #define LCD_DB2_PORT           PORTB
+  #define LCD_DB2_PIN            4
+  #define LCD_DB3_PORT           PORTB
+  #define LCD_DB3_PIN            5
 #endif
 #define LCD_DB4_PORT             PORTC       // If using 4 bit mode, you must configure DB4-DB7
 #define LCD_DB4_PIN              0
@@ -32,8 +32,8 @@
 #define LCD_RS_PORT              PORTB       // Port for RS line
 #define LCD_RS_PIN               0           // Pin for RS line
 
-#define LCD_RW_PORT              PORTB       // Port for RW line (ONLY used if RW_LINE_IMPLEMENTED=1)
-#define LCD_RW_PIN               1           // Pin for RW line (ONLY used if RW_LINE_IMPLEMENTED=1)
+#define LCD_RW_PORT              PORTC       // Port for RW line (ONLY used if RW_LINE_IMPLEMENTED=1)
+#define LCD_RW_PIN               6           // Pin for RW line (ONLY used if RW_LINE_IMPLEMENTED=1)
 
 #define LCD_DISPLAYS             1           // Up to 4 LCD displays can be used at one time
                                              // All pins are shared between displays except for the E
@@ -42,24 +42,24 @@
                                              // Display 1 Settings - if you only have 1 display, YOU MUST SET THESE
 #define LCD_DISPLAY_LINES        2           // Number of Lines, Only Used for Set I/O Mode Command
 #define LCD_E_PORT               PORTB       // Port for E line
-#define LCD_E_PIN                3           // Pin for E line
+#define LCD_E_PIN                1           // Pin for E line
 
 #if (LCD_DISPLAYS>=2)                        // If you have 2 displays, set these and change LCD_DISPLAYS=2
   #define LCD_DISPLAY2_LINES     2           // Number of Lines, Only Used for Set I/O Mode Command
   #define LCD_E2_PORT            PORTB       // Port for E line
-  #define LCD_E2_PIN             3           // Pin for E line
+  #define LCD_E2_PIN             1           // Pin for E line
 #endif
 
 #if (LCD_DISPLAYS>=3)                        // If you have 3 displays, set these and change LCD_DISPLAYS=3
   #define LCD_DISPLAY3_LINES     2           // Number of Lines, Only Used for Set I/O Mode Command
   #define LCD_E3_PORT            PORTB       // Port for E line
-  #define LCD_E3_PIN             3           // Pin for E line
+  #define LCD_E3_PIN             1           // Pin for E line
 #endif
 
 #if (LCD_DISPLAYS>=4)                        // If you have 4 displays, set these and change LCD_DISPLAYS=4
   #define LCD_DISPLAY4_LINES     2           // Number of Lines, Only Used for Set I/O Mode Command
   #define LCD_E4_PORT            PORTB       // Port for E line
-  #define LCD_E4_PIN             3           // Pin for E line
+  #define LCD_E4_PIN             1           // Pin for E line
 #endif
 
 #endif
