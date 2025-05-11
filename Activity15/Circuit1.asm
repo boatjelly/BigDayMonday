@@ -1,8 +1,6 @@
-;
 ; This code acts as a NOR logic gate
 ; WRITTEN: 05/09/2025
-; AUTHOR : Jacob JM Horstman, Sasha Dauz
-;
+; AUTHOR : Jacob JM Horstman
 ; I/O pins
 ; D2: LED
 ; A5: pushbutton    (external pull-down)
