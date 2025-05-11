@@ -1,5 +1,6 @@
 /*
   Smart Car Permanent Header
+  Left
   By: Sasha Dauz, Robert J. Guziec, Jacob JM Horstman
   Written: May 8th, 2025
   Edited: --
@@ -24,10 +25,17 @@
   D11: Right Motor Forward   [TCNT2 OC2A] [Pin 15 H-Bridge]
   D12: Right Whisker         [PCI PORTB 0x10]
   D13: Left Whisker          [PCI PORTB 0x20]
+
+  Ideas:
+  - ultrasonic sensor hug the left wall
+  - whiskers hug the left wall
+  - whiskers detection
+
+  NOTE: *AIM JEREMY TO HIT LEFT WALL*
 */
 
-volatile unsigned char whiskerLeft = 1;   // Active-LOW
-volatile unsigned char whiskerRight = 1;  // Active-LOW
+volatile unsigned char whiskerLeft = 1;
+volatile unsigned char whiskerRight = 1;
 const unsigned char DELAY = 50; // sick of writing 50
 
 void setup() {
@@ -55,52 +63,75 @@ void setup() {
 }
 
 // ***** MOTOR CONTROL *****
+// Format for motors:
+// OCR0A = L motor forward   OCR0B = L motor reverse
+// OCR2A = R motor forward   OCR2B = R motor reverse
+
+// Correct, tested
 void moveForward() {
   OCR0A = 237; OCR0B = 0;
-  OCR2A = 255; OCR2B = 0; // OCR2B NOT WORKING
+  OCR2A = 255; OCR2B = 0;
   //  Serial.println("moveForward");
 }
 
+// Correct, not tested
 void moveBackward() {
   OCR0A = 0; OCR0B = 237;
   OCR2A = 0; OCR2B = 255;
   //  Serial.println("moveBackward");
 }
 
-void turnLeft() { // Check this
-  OCR0A = 0; OCR0B = 200;
+// Correct, not tested
+void turnLeft() {
+  OCR0A = 0;   OCR0B = 200;
   OCR2A = 200; OCR2B = 0;
   //  Serial.println("turnLeft");
-
 }
 
-void turnRight() { // Check this
+// Correct, not tested
+void turnRight() {
   OCR0A = 200; OCR0B = 0;
   OCR2A = 0; OCR2B = 200;
   //  Serial.println("turnRight");
-
 }
 
 // ***** MAIN LOOP: Hug the Left Wall Logic *****
+
+// If whisker left detects wall:
+// 1. Back up
+// 2. Turn slightly right
+// 3. Go forward
+
 void loop() {
   moveForward();
   Serial.println("loop");
 }
 
+// Consider moving function logic into logic here to avoid spaghetti code
 ISR(PCINT0_vect) {
   Serial.println("ISR");
   // Read whiskers
   whiskerLeft  = (PINB & 0x20) >> 5;  // D13
   whiskerRight = (PINB & 0x10) >> 4;  // D12
-  if (whiskerLeft == 0 && whiskerRight == 1) {
-    // Wall on left, front clear -> move forward hugging wall
-    moveForward();
-    Serial.println("Left press");
+
+  // Adjust time to move as needed
+  if (whiskerLeft == 0) {
+    // Back up a bit
+    for(unsigned char i = 0; i < 8; i++){
+      moveBackward();
+      _delay_ms(50);
+    }
+    // Turn right slightly
+    for(unsigned char i = 0; i < 8; i++){
+      turnRight();
+      _delay_ms(10);
+    }
   }
-  else if (whiskerRight == 0 && whiskerLeft == 1) {
-    // Wall on front-right -> turn slightly left
-    turnLeft();
-    _delay_ms(DELAY);
-    Serial.println("Right press");
+  else if (whiskerRight == 0) {
+    // Turn left if Jer hits a wall on the right
+    for(unsigned char i = 0; i < 8; i++){
+      moveBackward();
+      _delay_ms(100);
+    }
   }
 }
