@@ -4,7 +4,7 @@
 ; WRITTEN: 05/09/2025
 ; AUTHOR : Jacob JM Horstman
 ; I/O pins
-; D3: Toggle Switch (external pull-down)
+; D3: Toggle Switch (external pull-down -> Necessary to clean noise/mechanical switch bounce?)
 ; D2: LED
 ; A5: pushbutton    (external pull-down)
 ; A4: pushbutton    (external pull-down)
