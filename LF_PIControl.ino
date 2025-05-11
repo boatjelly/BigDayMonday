@@ -111,7 +111,7 @@ void loop() {
     rHold = 0;
   }
 
-  // make sure that PWM isn't too high or low
+  // bounds for PWM
   if (leftPWM > 255) leftPWM = 255;
   if (leftPWM < 0) leftPWM = 0;
   if (rightPWM > 255) rightPWM = 255;
