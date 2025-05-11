@@ -20,8 +20,8 @@
   D6: Left Motor Forward     [TCNT0 OC0A] [Pin 2 H-Bridge]
   D7: Right Motor Control    [x]          [Pin 9 H-Bridge]
   D8: LCD R/S
-  D9: LCD RW
-  D10: E
+  D9: LCD E
+  D10: 
   D11: Right Motor Forward   [TCNT2 OC2A] [Pin 15 H-Bridge]
   D12: Right Whisker         [PCI PORTB 0x10]
   D13: Left Whisker          [PCI PORTB 0x20]
