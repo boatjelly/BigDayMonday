@@ -1,7 +1,7 @@
 /*
   Line Following with PI Control
   Written: May 7, 2025
-  Edited: -
+  Edited: May 10, 2025
   I/O:
   A0:  [INPUT] Left Line Sensor
   A1:  [INPUT] Center Line Sensor
@@ -17,6 +17,9 @@
   - PI Control added
   - greg exists in the ISRs
   - moved logic to loop; ISR only collects data and some PI stuff now
+  - added runningSum for live integral term
+  - added detection buffer for line threshold
+  - switched to weighted error based on all sensors (s/o Diego)
 
   TO DO:
   - see if it works
@@ -38,11 +41,31 @@ const unsigned char FWD = 230;
 const unsigned char BLK = 215;
 const unsigned int HLT = 1817;
 
-volatile unsigned char pV = 0;
-const unsigned char sP = 123;
-volatile unsigned int err = 0;
-const unsigned char tau = 255;
-volatile unsigned int errHist[255] = {};
+// PI Constants
+// KP and KI control how strong the correction is
+// KIDIV is a DIVisor to scale the integral term
+// tau is how many error values we remember for integral control
+const unsigned char KP = 2;
+const unsigned char KI = 1;
+const unsigned char KIDIV = 100;
+const unsigned char tau = 50;
+
+// error history and running sum
+volatile unsigned int err = 0; // current error
+volatile unsigned int errHist[tau] = {}; // history of past errors
+volatile unsigned int runningSum = 0; // total of recent errors for int term
+volatile unsigned char x = 0; // index to keep track of element positiin in errorHist
+
+// weighted error constants
+const signed char WL = 2; // left sensor weight
+const signed char WC = 0; // center sensor weight
+const signed char WR = 2; // right sensor weight
+
+// detection buffer for black line
+const unsigned char BLK_BUF = 5; // how much darker than threshold  
+const unsigned char BLK_HOLD = 5; // how many times in a row seeing black to AHHHHHHH
+volatile unsigned char lHold = 0; // left sensor counter
+volatile unsigned char rHold = 0; // right sensor counter
 
 void setup() {
   cli();
@@ -66,48 +89,41 @@ void setup() {
 }
 
 void loop() {
-  // Compute sum of error history for integral term
-  int sum = 0;
-  for (unsigned char j = 0; j < tau; j++) {
-    sum += errHist[j];
-  }
+  // calculate adjustment
+  int adjustment = (KP * err) / 10 + (KI * runningSum) / KIDIV;
 
-  // Adjustment using PI formula
-  int adjustment = (2 * err) / 10 + (1 * sum) / 100;
-
-  // Modify left and right motor speeds with PI adjustment
+  // adjust motor speed based on error
   int leftPWM = FWD + adjustment;
   int rightPWM = FWD - adjustment;
 
-  // Kill the motors if the sensors see black
-  if (leftyLoosey >= BLK) {
-    leftPWM = 0;
+  // if left sensor sees black multiple times, stop left motor
+  if (leftyLoosey >= BLK + BLK_BUF) {
+    lHold++;
+    if (lHold >= BLK_HOLD) leftPWM = 0;
+  } else {
+    lHold = 0;
   }
-  if (rightyTighty >= BLK) {
-    rightPWM = 0;
-  }
-
-  // You shall not EXCEED the limits
-  if (leftPWM > 255) {
-    leftPWM = 255;
-  }
-  if (leftPWM < 0) {
-    leftPWM = 0;
-  }
-  if (rightPWM > 255) {
-    rightPWM = 255;
-  }
-  if (rightPWM < 0) {
-    rightPWM = 0;
+  // if right sensor sees black multiple times, stop right motor
+  if (rightyTighty >= BLK + BLK_BUF) {
+    rHold++;
+    if (rHold >= BLK_HOLD) rightPWM = 0;
+  } else {
+    rHold = 0;
   }
 
-  // Stop the course if Jer completes track
+  // make sure that PWM isn't too high or low
+  if (leftPWM > 255) leftPWM = 255;
+  if (leftPWM < 0) leftPWM = 0;
+  if (rightPWM > 255) rightPWM = 255;
+  if (rightPWM < 0) rightPWM = 0;
+
+  // stop when at end of track
   if (avg >= HLT) {
     OCR0B = 0;
     OCR2A = 0;
   } else {
-    OCR0B = (unsigned char) leftPWM;
-    OCR2A = (unsigned char) rightPWM;
+    OCR0B = leftPWM;
+    OCR2A = rightPWM;
   }
 }
 
@@ -115,37 +131,43 @@ volatile unsigned char storeREG = 0;
 ISR(ADC_vect) {
   storeREG = SREG;
 
-  static unsigned int x = 0;
   static unsigned char sensor = 0;
 
   switch (sensor) {
     case 0:
       leftyLoosey = ADCH;
-      ADMUX &= 0xF8;
-      ADMUX |= 0x01;
+      ADMUX = (ADMUX & 0xF8) | 0x01;
       sensor++;
       break;
     case 1:
       center = ADCH;
-      pV = center;
-      err = sP - pV;
-      errHist[x] = err;
-      x++;
-      if (x == tau) {
-        x = 0;
-      }
-      ADMUX &= 0xF8;
-      ADMUX |= 0x02;
+      ADMUX = (ADMUX & 0xF8) | 0x02;
       sensor++;
       break;
     case 2:
       rightyTighty = ADCH;
-      ADMUX &= 0xF8;
+
+      // calculate weighted error with sensor values
+      err = (-WL * leftyLoosey) + (WC * center) + (WR * rightyTighty);
+
+      // update runningSum
+      // remove old value that's gonna be overwritten
+      runningSum -= errHist[x];
+      // store newest error at x
+      errHist[x] = err;
+      // add new error to the sum
+      runningSum += err;
+      // move index
+      x++;
+      // back to the beginning if you're at the end of the buffer
+      if (x == tau) x = 0;
+
+      ADMUX = (ADMUX & 0xF8);
       sensor = 0;
       break;
   }
 
-  ADCSRA |= 0x40; // Start next conversion
+  ADCSRA |= 0x40;
   SREG = storeREG;
 }
 
