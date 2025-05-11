@@ -14,15 +14,15 @@
   D0:
   D1:
   D2:
-  D3: Right Motor Reverse    [TCNT2 OC2B] [Pin 10 H-Bridge]
+  D3: 
   D4: Left Motor Control     [x]          [Pin 1 H-Bridge]
   D5: Left Motor Reverse     [TCNT0 OC0B] [Pin 7 H-Bridge]
   D6: Left Motor Forward     [TCNT0 OC0A] [Pin 2 H-Bridge]
   D7: Right Motor Control    [x]          [Pin 9 H-Bridge]
   D8:
-  D9:
-  D10:
-  D11: Right Motor Forward   [TCNT2 OC2A] [Pin 15 H-Bridge]
+  D9:  Right Motor Forward   [TCNT1 OC1A] [Pin 15 H-Bridge]
+  D10: Right Motor Reverse    [TCNT1 OC1B] [Pin 10 H-Bridge]
+  D11: 
   D12: Right Whisker         [PCI PORTB 0x10]
   D13: Left Whisker          [PCI PORTB 0x20]
 
@@ -45,12 +45,12 @@ void setup() {
   // PWM Setup
   TCCR0A = 0xA1;
   TCCR0B = 0x01;
-  TCCR2A = 0xA1;
-  TCCR2B = 0x01;
+  TCCR1A = 0xA1;
+  TCCR1B = 0x01;
 
   // Pin direction setup
-  DDRD = 0x68;   // D3, D5, D6: motor control
-  DDRB = 0x08;   // D11: motor control
+  DDRD = 0x60;   // D5, D6: motor control
+  DDRB = 0x06;   // D9, D10: motor control
 
   // Configure pin change interrupts for whiskers
   PCICR = 0x01;  // Enable PORT B
@@ -65,33 +65,33 @@ void setup() {
 // ***** MOTOR CONTROL *****
 // Format for motors:
 // OCR0A = L motor forward   OCR0B = L motor reverse
-// OCR2A = R motor forward   OCR2B = R motor reverse
+// OCR1A = R motor forward   OCR1B = R motor reverse
 
 // Correct, tested
 void moveForward() {
   OCR0A = 237; OCR0B = 0;
-  OCR2A = 255; OCR2B = 0;
+  OCR1A = 255; OCR1B = 0;
   //  Serial.println("moveForward");
 }
 
 // Correct, not tested
 void moveBackward() {
   OCR0A = 0; OCR0B = 237;
-  OCR2A = 0; OCR2B = 255;
+  OCR1A = 0; OCR1B = 255;
   //  Serial.println("moveBackward");
 }
 
 // Correct, not tested
 void turnLeft() {
-  OCR0A = 0;   OCR0B = 200;
-  OCR2A = 200; OCR2B = 0;
+  OCR0A = 0;   OCR0B = 255;
+  OCR1A = 255; OCR1B = 0;
   //  Serial.println("turnLeft");
 }
 
 // Correct, not tested
 void turnRight() {
-  OCR0A = 200; OCR0B = 0;
-  OCR2A = 0; OCR2B = 200;
+  OCR0A = 255; OCR0B = 0;
+  OCR1A = 0; OCR1B = 255;
   //  Serial.println("turnRight");
 }
 
@@ -115,7 +115,7 @@ ISR(PCINT0_vect) {
   whiskerRight = (PINB & 0x10) >> 4;  // D12
 
   // Adjust time to move as needed
-  if (whiskerLeft == 0) {
+  if (!whiskerLeft) {
     // Back up a bit
     for(unsigned char i = 0; i < 8; i++){
       moveBackward();
@@ -124,14 +124,19 @@ ISR(PCINT0_vect) {
     // Turn right slightly
     for(unsigned char i = 0; i < 8; i++){
       turnRight();
-      _delay_ms(10);
+      _delay_ms(50);
     }
   }
-  else if (whiskerRight == 0) {
+  else if (!whiskerRight) {
     // Turn left if Jer hits a wall on the right
     for(unsigned char i = 0; i < 8; i++){
       moveBackward();
-      _delay_ms(100);
+      _delay_ms(50);
+    }
+        // Turn left slightly
+    for(unsigned char i = 0; i < 8; i++){
+      turnLeft();
+      _delay_ms(50);
     }
   }
 }
