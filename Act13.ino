@@ -1,29 +1,31 @@
 /*
 Title: Activity 13 (Independent)
 Description: Use SPI to write ADC value to 4 7-segment displays via 74HC595s and separate SS pins.
+Authors: Sasha Dauz, Jacob JM Horstman
 Written: May 15, 2025
 I/O Pins:
-A0–A3: SS1–SS4 (active low)
+A0–A3: SS1–SS4 (active low) (10s place to 1000s place)
 A5: Potentiometer input
-D11: MOSI
-D12: MISO
-D13: SCK
+D11: MOSI - SER
+D12: MISO - QH'
+D13: SCK - SRCLK
 */
 
 void setup() {
   cli();
-  
-  DDRB = 0x2C; // MOSI (PB3), SCK (PB5), SSx not used
-  DDRC |= 0x0F; // Set A0–A3 as output for SS pins
-  PORTC |= 0x0F; // Deactivate all SS pins (active low)
+
+  // Configure outputs
+  DDRB = 0x2C;
+  DDRC |= 0x0F;
+  PORTC |= 0x0F;
   
   // ADC Setup
-  ADCSRA = 0xE7; // Enable, Start conversion, Auto-trigger, Prescaler 128
+  ADCSRA = 0xE7;
   ADCSRB = 0x00;
-  ADMUX = 0x45; // Use A5, AVcc ref, right adjust
+  ADMUX = 0x45;
   
   // SPI Setup (MSB first, Primary, fosc/4)
-  SPCR = 0x50;
+  SPCR = 0x70;
   
   sei();
 }
@@ -43,14 +45,14 @@ void loop() {
   
   // Write each digit to its corresponding SS pin
   for (unsigned char i = 0; i < 4; i++) {
-    PORTC &= ~(1 << i); // Activate SS[i]
-    writeSPI(digits[i]); // Send data
-    PORTC |= (1 << i); // Deactivate SS[i]
+    PORTC &= ~(1 << i);
+    writeSPI(digits[i]);
+    PORTC |= (1 << i);
   }
   _delay_ms(50);
 }
 
-void writeToSPI(char dataToWrite){
+void writeSPI(char dataToWrite){
     SPDR = dataToWrite;
     while (!(SPSR & (1 << SPIF)));  // Wait until transfer is complete
 }
